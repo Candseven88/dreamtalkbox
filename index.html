@@ -7,102 +7,130 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      background: linear-gradient(to bottom, #f9f2ff, #ffffff);
+      background: #f0f8ff;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
     .logo {
       width: 120px;
-      margin-top: 30px;
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: 20px;
     }
-    .input-container {
-      margin: 20px;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
     input {
       padding: 10px;
-      width: 300px;
-      border-radius: 8px;
+      width: 260px;
+      margin-bottom: 10px;
+      border-radius: 20px;
       border: 1px solid #ccc;
     }
-    .action-buttons button {
-      margin: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      background-color: #a700f5;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
+    .carousel-container {
+      position: relative;
+      max-width: 1000px;
+      margin: 40px auto;
     }
-    .section-title {
-      font-size: 24px;
-      margin-top: 40px;
-      font-weight: bold;
-    }
-    #storyCarousel {
+    .carousel {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 20px;
+      overflow: hidden;
+      gap: 20px;
+      scroll-behavior: smooth;
     }
     .card {
-      width: 200px;
-      margin: 10px;
+      flex: 0 0 23%;
+      background: white;
       padding: 10px;
       border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
     }
-    .cover {
+    .card img {
       width: 100%;
+      height: 140px;
+      object-fit: cover;
       border-radius: 8px;
     }
-    .card h3 {
-      font-size: 16px;
-      margin: 10px 0 5px 0;
+    button {
+      margin: 6px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      background: #a100f2;
+      color: white;
+      cursor: pointer;
     }
-    .card p {
-      font-size: 12px;
-      color: #666;
+    #carouselControls {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <img src="dreamtalk-logo.png" class="logo" alt="Logo" />
+  <img src="dreamtalk-logo.png" class="logo" alt="DreamTalk Logo" />
   <h1>DreamTalk Box</h1>
+  <input id="keywordInput" placeholder="Enter a story keyword..." />
+  <br />
+  <button onclick="generateStory()">📖 Generate Full Story</button>
+  <button onclick="window.location.href='record.html'">🎤 Upload Voice</button>
 
-  <div class="input-container">
-    <input type="text" id="keywordInput" placeholder="Enter a story keyword..." />
-    <div class="action-buttons">
-      <button onclick="generateStory()">📖 Generate Full Story</button>
-      <button onclick="window.location.href='record.html'">🎤 Upload Voice</button>
+  <h2>🌟 Built-in Bedtime Stories</h2>
+  <div class="carousel-container">
+    <div id="carousel" class="carousel"></div>
+    <div id="carouselControls">
+      <button onclick="pauseCarousel()">⏸️ Pause Carousel</button>
+      <button onclick="resumeCarousel()">▶️ Resume Carousel</button>
     </div>
   </div>
 
-  <div class="section-title">🌟 Built-in Bedtime Stories</div>
-  <div id="storyCarousel"></div>
+<script>
+  let carouselIndex = 0;
+  let carouselInterval = 5000; // 5 seconds
+  let carouselTimer = null;
+  const carouselEl = document.getElementById("carousel");
 
-  <script>
-    function generateStory() {
-      alert("Story generation feature is under development.");
+  function generateStory() {
+    const keyword = document.getElementById("keywordInput").value.trim();
+    if (keyword) {
+      localStorage.setItem("keyword", keyword);
+      window.location.href = "story-player.html";
     }
+  }
 
-    fetch("stories.json")
-      .then((res) => res.json())
-      .then((stories) => {
-        const container = document.getElementById("storyCarousel");
-        stories.forEach((story) => {
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerHTML = `
-            <img src="${story.cover}" class="cover" alt="${story.title}" />
-            <h3>${story.title}</h3>
-            <p>${story.content}</p>
-          `;
-          container.appendChild(div);
-        });
-      });
-  </script>
+  fetch("stories.json").then(r => r.json()).then(data => {
+    const stories = data;
+    stories.forEach(story => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = \`
+        <img src="\${story.cover}" />
+        <h3>\${story.title}</h3>
+        <button onclick="window.location.href='story-player.html?id=\${story.id}'">▶️ Play</button>
+      \`;
+      carouselEl.appendChild(card);
+    });
+    startCarousel();
+  });
+
+  function startCarousel() {
+    carouselTimer = setInterval(() => {
+      carouselIndex++;
+      const scrollLeft = carouselEl.clientWidth * carouselIndex;
+      if (scrollLeft >= carouselEl.scrollWidth) {
+        carouselIndex = 0;
+      }
+      carouselEl.scrollTo({ left: carouselEl.clientWidth * carouselIndex, behavior: 'smooth' });
+    }, carouselInterval);
+  }
+
+  function pauseCarousel() {
+    clearInterval(carouselTimer);
+  }
+
+  function resumeCarousel() {
+    startCarousel();
+  }
+</script>
 </body>
 </html>
