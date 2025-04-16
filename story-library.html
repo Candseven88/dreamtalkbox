@@ -12,7 +12,11 @@
       text-align: center;
     }
     h1 {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 20px;
     }
     .story-grid {
       display: grid;
@@ -39,6 +43,7 @@
       color: white;
       border-radius: 20px;
       cursor: pointer;
+      margin: 4px;
     }
     .story-card button:hover {
       background: linear-gradient(135deg, #6900cc, #cb00f0);
@@ -46,15 +51,44 @@
   </style>
 </head>
 <body>
-  <h1>📚 My Uploaded Stories</h1>
+  <h1>📚 My Story Library</h1>
+
+  <h2>❤️ My Favorite Stories</h2>
+  <div class="story-grid" id="favoriteStories"></div>
+
+  <h2>📝 My Uploaded Stories</h2>
   <div class="story-grid" id="myStories"></div>
 
 <script>
-  const container = document.getElementById("myStories");
+  // 渲染收藏的系统故事
+  const favContainer = document.getElementById("favoriteStories");
+  const favIDs = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+  fetch("stories.json")
+    .then(res => res.json())
+    .then(stories => {
+      const favStories = stories.filter(s => favIDs.includes(s.id));
+      if (favStories.length === 0) {
+        favContainer.innerHTML = "<p>No favorites yet.</p>";
+      } else {
+        favStories.forEach(story => {
+          const card = document.createElement("div");
+          card.className = "story-card";
+          card.innerHTML = `
+            <h3>${story.title}</h3>
+            <button onclick="window.location.href='story-player.html?id=${story.id}'">▶️ Play</button>
+          `;
+          favContainer.appendChild(card);
+        });
+      }
+    });
+
+  // 渲染我的上传故事
+  const myContainer = document.getElementById("myStories");
   const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
 
   if (stories.length === 0) {
-    container.innerHTML = "<p>No uploaded stories yet. Try <a href='story-upload.html'>uploading one</a>!</p>";
+    myContainer.innerHTML = "<p>No uploaded stories yet. Try <a href='story-upload.html'>uploading one</a>!</p>";
   } else {
     stories.forEach(story => {
       const card = document.createElement("div");
@@ -63,7 +97,7 @@
         <h3>${story.title}</h3>
         <button onclick="window.location.href='story-player.html?id=${story.id}'">▶️ Play</button>
       `;
-      container.appendChild(card);
+      myContainer.appendChild(card);
     });
   }
 </script>
