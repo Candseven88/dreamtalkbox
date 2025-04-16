@@ -49,7 +49,7 @@
   </style>
 </head>
 <body>
-  <h1>📝 Upload Your Custom Story</h1>
+  <h1>📝 Upload or Edit Your Story</h1>
   <div class="form-box">
     <label>Story Title:</label>
     <input type="text" id="storyTitle" placeholder="e.g. My Magical Dream" />
@@ -59,6 +59,9 @@
   </div>
 
 <script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const editId = urlParams.get("id");  // e.g. custom2
+
   function saveStory() {
     const title = document.getElementById('storyTitle').value.trim();
     const content = document.getElementById('storyContent').value.trim();
@@ -68,12 +71,29 @@
     }
 
     const stored = JSON.parse(localStorage.getItem("customStories") || "[]");
-    const id = "custom" + (stored.length + 1);
-    stored.push({ id, title, content });
-    localStorage.setItem("customStories", JSON.stringify(stored));
 
+    if (editId) {
+      const index = stored.findIndex(s => s.id === editId);
+      if (index >= 0) {
+        stored[index] = { id: editId, title, content };
+      }
+    } else {
+      const id = "custom" + (stored.length + 1);
+      stored.push({ id, title, content });
+    }
+
+    localStorage.setItem("customStories", JSON.stringify(stored));
     alert("✅ Story saved!");
-    window.location.href = "story-player.html?id=" + id;
+    window.location.href = "story-player.html?id=" + (editId || "custom" + stored.length);
+  }
+
+  if (editId) {
+    const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
+    const found = stories.find(s => s.id === editId);
+    if (found) {
+      document.getElementById('storyTitle').value = found.title;
+      document.getElementById('storyContent').value = found.content;
+    }
   }
 </script>
 </body>
