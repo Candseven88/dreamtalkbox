@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DreamTalk Box - Home</title>
+  <title>DreamTalk Box - Carousel Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -21,18 +21,12 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
-    .input-section {
-      margin: 20px auto 40px;
-    }
     input[type="text"] {
       padding: 12px;
-      width: 250px;
+      width: 260px;
       font-size: 1rem;
       border-radius: 20px;
       border: 1px solid #ccc;
-    }
-    .action-buttons {
-      margin-top: 12px;
     }
     .action-buttons button {
       background: linear-gradient(135deg, #7F00FF, #E100FF);
@@ -44,52 +38,57 @@
       margin: 8px;
       cursor: pointer;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-      max-width: 1100px;
-      margin: 0 auto;
+    .carousel-wrapper {
+      max-width: 1000px;
+      margin: 40px auto;
+      position: relative;
+    }
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 20px;
+      padding: 10px;
+    }
+    .carousel::-webkit-scrollbar {
+      display: none;
     }
     .card {
+      min-width: 240px;
       background: white;
-      padding: 12px;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      flex-shrink: 0;
     }
     .card img {
       width: 100%;
-      height: 160px;
+      height: 150px;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: 16px 16px 0 0;
     }
     .card h3 {
       font-size: 1rem;
-      margin: 8px 0;
+      margin: 10px;
     }
-    .card a, .card button {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+    .card button, .card a {
+      margin: 6px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-size: 0.8rem;
       border: none;
       cursor: pointer;
-      margin: 4px;
+      display: inline-block;
     }
     .card a {
       background: #c147e9;
       color: white;
     }
-    .fav {
+    .card .fav {
       background: #eee;
-      color: #444;
     }
-    .fav.active {
+    .card .fav.active {
       background: #ffebf0;
       color: #d10073;
-    }
-    .feedback {
-      margin-top: 60px;
     }
     .feedback button {
       background: #ff69b4;
@@ -98,6 +97,7 @@
       border: none;
       border-radius: 10px;
       font-size: 1rem;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -106,7 +106,7 @@
 <img src="dreamtalk-logo.png" class="logo" />
 <h1>DreamTalk Box</h1>
 
-<div class="input-section">
+<div>
   <input type="text" id="keywordInput" placeholder="Enter a story keyword..." />
   <div class="action-buttons">
     <button onclick="generateStory()">📖 Generate Full Story</button>
@@ -115,7 +115,9 @@
 </div>
 
 <h2>🌟 Built-in Bedtime Stories</h2>
-<div class="grid" id="storyGrid"></div>
+<div class="carousel-wrapper">
+  <div class="carousel" id="storyCarousel"></div>
+</div>
 
 <div class="feedback">
   <button onclick="openFeedback()">💬 Leave Feedback</button>
@@ -126,26 +128,24 @@
 
 <script>
   const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-  const storyGrid = document.getElementById("storyGrid");
+  const container = document.getElementById("storyCarousel");
 
-  fetch("stories.json")
-    .then(res => res.json())
-    .then(stories => {
-      stories.forEach(s => {
-        const fav = favorites.includes(s.id);
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = \`
-          <img src="\${s.cover}" />
-          <h3>\${s.title}</h3>
-          <a href="story-player.html?id=\${s.id}">▶️ Play</a>
-          <button class="fav \${fav ? 'active' : ''}" onclick="toggleFavorite('\${s.id}', this)">
-            \${fav ? '✅ Favorited' : '⭐ Favorite'}
-          </button>
-        \`;
-        storyGrid.appendChild(card);
-      });
+  fetch("stories.json").then(r => r.json()).then(stories => {
+    stories.forEach(s => {
+      const fav = favorites.includes(s.id);
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = \`
+        <img src="\${s.cover}" />
+        <h3>\${s.title}</h3>
+        <a href="story-player.html?id=\${s.id}">▶️ Play</a>
+        <button class="fav \${fav ? 'active' : ''}" onclick="toggleFavorite('\${s.id}', this)">
+          \${fav ? '✅ Favorited' : '⭐ Favorite'}
+        </button>
+      \`;
+      container.appendChild(div);
     });
+  });
 
   function toggleFavorite(id, btn) {
     const i = favorites.indexOf(id);
@@ -155,26 +155,27 @@
     btn.classList.toggle("active", favorites.includes(id));
   }
 
-  function generateStory() {
-    const keyword = document.getElementById("keywordInput").value.trim();
-    if (!keyword) return alert("Please enter a keyword");
-    localStorage.setItem("keyword", keyword);
-    window.location.href = "story-player.html";
-  }
-
   function openFeedback() {
     const msg = prompt("We'd love your feedback!");
-    if (msg) alert("Thanks! (This would normally be saved to a database.)");
+    if (msg) alert("Thanks! (Simulated feedback saved)");
+  }
+
+  function generateStory() {
+    const k = document.getElementById("keywordInput").value.trim();
+    if (!k) return alert("Please enter a keyword!");
+    localStorage.setItem("keyword", k);
+    window.location.href = "story-player.html";
   }
 
   window.onload = () => {
     try { document.getElementById("bgm").play(); } catch (e) {}
-    document.querySelectorAll("button").forEach(btn =>
+    document.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
         const s = document.getElementById("clickSound");
-        s.currentTime = 0; s.play();
-      })
-    );
+        s.currentTime = 0;
+        s.play();
+      });
+    });
   };
 </script>
 
