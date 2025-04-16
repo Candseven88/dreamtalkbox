@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Your Story - DreamTalk Box</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #c9d6ff, #fbc2eb);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    img.logo {
+      width: 120px;
+      margin-bottom: 20px;
+      animation: bounceLogo 2s infinite;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    input, textarea {
+      width: 90%;
+      max-width: 600px;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #aaa;
+      font-size: 1rem;
+    }
+
+    textarea {
+      height: 200px;
+      resize: vertical;
+    }
+
+    .action-button {
+      background: linear-gradient(135deg, #7F00FF, #E100FF);
+      border: none;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
+
+    .action-button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #8f00ff, #d900ff);
+    }
+
+    .music-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      border: none;
+      color: #333;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<img src="dreamtalk-logo.png" alt="Logo" class="logo" />
+<h1>Write or Paste Your Own Story</h1>
+
+<input type="text" id="storyTitle" placeholder="Story Title" />
+<textarea id="storyContent" placeholder="Enter your bedtime story here..."></textarea>
+
+<div>
+  <button class="action-button" onclick="saveStory()">💾 Save Story</button>
+  <button class="action-button" onclick="window.location.href='index.html'">🏠 Back to Home</button>
+</div>
+
+<button class="music-toggle" onclick="toggleMusic()">🔈 Music</button>
+
+<audio id="backgroundMusic" loop preload="auto">
+  <source src="story-bgm.mp3" type="audio/mpeg" />
+</audio>
+<audio id="clickSound" preload="auto">
+  <source src="stop-record.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+  const clickSound = document.getElementById('clickSound');
+  function playClick() {
+    if (clickSound) {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    }
+  }
+
+  function toggleMusic() {
+    playClick();
+    const music = document.getElementById('backgroundMusic');
+    const btn = document.querySelector('.music-toggle');
+    if (music.paused) {
+      music.play();
+      btn.textContent = '🔈 Music';
+    } else {
+      music.pause();
+      btn.textContent = '🔇 Muted';
+    }
+  }
+
+  function saveStory() {
+    playClick();
+    const title = document.getElementById('storyTitle').value.trim();
+    const content = document.getElementById('storyContent').value.trim();
+    if (!title || !content) {
+      alert("Please enter both a title and content.");
+      return;
+    }
+
+    const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
+    stories.push({ title, content, created: new Date().toISOString(), favorite: false });
+    localStorage.setItem("customStories", JSON.stringify(stories));
+
+    alert("✅ Story saved successfully!");
+    document.getElementById('storyTitle').value = "";
+    document.getElementById('storyContent').value = "";
+  }
+
+  window.onload = () => {
+    const bgm = document.getElementById('backgroundMusic');
+    bgm && bgm.play().catch(() => {});
+    document.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", playClick);
+    });
+  };
+</script>
+
+</body>
+</html>

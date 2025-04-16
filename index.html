@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DreamTalk Box - Generate Story</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #c9d6ff, #fbc2eb);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    img.logo {
+      width: 140px;
+      margin-bottom: 20px;
+      animation: bounceLogo 2s infinite;
+    }
+
+    @keyframes bounceLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      font-size: 1rem;
+      width: 260px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .action-button {
+      background: linear-gradient(135deg, #7F00FF, #E100FF);
+      border: none;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
+
+    .action-button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #8f00ff, #d900ff);
+    }
+
+    .story-box {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      margin-top: 30px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .music-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      border: none;
+      color: #333;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<img src="dreamtalk-logo.png" alt="DreamTalk Logo" class="logo" />
+<h1>DreamTalk Box</h1>
+
+<div class="input-group">
+  <input type="text" id="keywordInput" placeholder="Enter a story keyword..." />
+</div>
+
+<div>
+    <button class="action-button" onclick="window.location.href='story-player.html'">📖 Generate Full Story</button>
+    <button class="action-button" onclick="window.location.href='record.html'">🎤 Upload Voice</button>
+  </div>
+
+<div class="story-box" id="storyDisplay" style="display: none;"></div>
+
+<button class="music-toggle" onclick="toggleMusic()">🔈 Music</button>
+
+<audio id="backgroundMusic" loop preload="auto">
+  <source src="story-bgm.mp3" type="audio/mpeg" />
+</audio>
+<audio id="clickSound" preload="auto">
+  <source src="stop-record.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+  const clickSound = document.getElementById('clickSound');
+
+  function playClick() {
+    if (clickSound) {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    }
+  }
+
+  function toggleMusic() {
+    playClick();
+    const music = document.getElementById('backgroundMusic');
+    const btn = document.querySelector('.music-toggle');
+    if (music.paused) {
+      music.play();
+      btn.textContent = '🔈 Music';
+    } else {
+      music.pause();
+      btn.textContent = '🔇 Muted';
+    }
+  }
+
+  function generateStory() {
+    playClick();
+    const keyword = document.getElementById('keywordInput').value.trim();
+    const storyBox = document.getElementById('storyDisplay');
+
+    if (!keyword) {
+      storyBox.innerHTML = "Please enter a keyword!";
+      storyBox.style.display = 'block';
+      return;
+    }
+
+    const story = `Once upon a time, there was a magical place full of dreams and wonder where a little child named ${keyword} would drift into an enchanted forest each night. There, they met talking animals, floating stars, and a gentle moon that told bedtime stories...`;
+    storyBox.innerText = story;
+    storyBox.style.display = 'block';
+
+    localStorage.setItem("latestStory", story);
+  }
+
+  function speakStory() {
+    playClick();
+    const story = document.getElementById('storyDisplay').innerText;
+    if (!story) return;
+
+    const utterance = new SpeechSynthesisUtterance(story);
+    utterance.lang = 'en-US';
+    utterance.rate = 1;
+    utterance.pitch = 1.2;
+    speechSynthesis.cancel(); // stop previous
+    speechSynthesis.speak(utterance);
+  }
+
+  window.onload = () => {
+    const bgm = document.getElementById('backgroundMusic');
+    if (bgm) {
+      bgm.play().catch(() => {});
+    }
+
+    document.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", playClick);
+    });
+  };
+</script>
+
+<!-- 🌟 用户反馈按钮 -->
+<div style="margin-top: 40px; text-align: center;">
+    <button onclick="openFeedbackForm()" style="background-color: #ff69b4; color: white; padding: 10px 20px; border: none; border-radius: 8px;">💬 Leave Feedback</button>
+  </div>
+  
+  <script>
+    function openFeedbackForm() {
+      const feedback = prompt("We'd love your feedback! Please share your thoughts:");
+      if (feedback) {
+        alert("Thanks for your feedback!\n\n(Your message was recorded in memory.)");
+        // 👉 TODO: Send to Google Sheet, Notion, Email, or database here
+      }
+    }
+  </script>
+
+</body>
+</html>

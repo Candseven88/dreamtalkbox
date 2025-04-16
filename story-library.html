@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Stories - DreamTalk Box</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #c9d6ff, #fbc2eb);
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .story-list {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .story-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 10px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .story-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .story-card small {
+      color: #888;
+    }
+
+    .story-actions {
+      margin-top: 12px;
+    }
+
+    .story-actions button {
+      margin-right: 10px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-play { background-color: #6c63ff; color: white; }
+    .btn-delete { background-color: #ff6b6b; color: white; }
+    .btn-fav { background-color: #feca57; }
+
+    .action-button {
+      background: linear-gradient(135deg, #7F00FF, #E100FF);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .music-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      border: none;
+      color: #333;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📚 My Stories</h1>
+<div class="story-list" id="storyList">Loading...</div>
+
+<button class="action-button" onclick="window.location.href='index.html'">🏠 Back to Home</button>
+<button class="music-toggle" onclick="toggleMusic()">🔈 Music</button>
+
+<audio id="backgroundMusic" loop preload="auto">
+  <source src="story-bgm.mp3" type="audio/mpeg" />
+</audio>
+<audio id="clickSound" preload="auto">
+  <source src="stop-record.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+  const clickSound = document.getElementById('clickSound');
+  function playClick() {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
+
+  function toggleMusic() {
+    playClick();
+    const music = document.getElementById('backgroundMusic');
+    const btn = document.querySelector('.music-toggle');
+    if (music.paused) {
+      music.play();
+      btn.textContent = '🔈 Music';
+    } else {
+      music.pause();
+      btn.textContent = '🔇 Muted';
+    }
+  }
+
+  function renderStories() {
+    const list = document.getElementById("storyList");
+    const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
+
+    if (stories.length === 0) {
+      list.innerHTML = "<p>No stories saved yet.</p>";
+      return;
+    }
+
+    list.innerHTML = "";
+    stories.forEach((story, index) => {
+      const div = document.createElement("div");
+      div.className = "story-card";
+      div.innerHTML = `
+        <h3>${story.favorite ? "⭐ " : ""}${story.title}</h3>
+        <small>${new Date(story.created).toLocaleString()}</small>
+        <div class="story-actions">
+          <button class="btn-play" onclick="playStory(${index})">▶️ Play</button>
+          <button class="btn-fav" onclick="toggleFavorite(${index})">⭐ Favorite</button>
+          <button class="btn-delete" onclick="deleteStory(${index})">🗑️ Delete</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function playStory(index) {
+    playClick();
+    localStorage.setItem("latestStoryIndex", index);
+    window.location.href = "story-player.html";
+  }
+
+  function deleteStory(index) {
+    playClick();
+    if (confirm("Are you sure you want to delete this story?")) {
+      const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
+      stories.splice(index, 1);
+      localStorage.setItem("customStories", JSON.stringify(stories));
+      renderStories();
+    }
+  }
+
+  function toggleFavorite(index) {
+    playClick();
+    const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
+    stories[index].favorite = !stories[index].favorite;
+    localStorage.setItem("customStories", JSON.stringify(stories));
+    renderStories();
+  }
+
+  window.onload = () => {
+    const bgm = document.getElementById('backgroundMusic');
+    bgm && bgm.play().catch(() => {});
+    document.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", playClick);
+    });
+    renderStories();
+  };
+</script>
+
+</body>
+</html>
