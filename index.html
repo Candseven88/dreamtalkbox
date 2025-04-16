@@ -1,247 +1,101 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DreamTalk Box - Generate Story</title>
+  <title>DreamTalk Box - Home</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #c9d6ff, #fbc2eb);
-      min-height: 100vh;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    body { font-family: sans-serif; background: #fffafc; padding: 40px; }
+    h1 { text-align: center; }
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .story-card {
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: center;
     }
-
-    img.logo {
-      width: 140px;
-      margin-bottom: 20px;
-      animation: bounceLogo 2s infinite;
+    .story-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
     }
-
-    @keyframes bounceLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    .input-group {
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
-      padding: 12px;
+    .story-card h3 {
+      margin-top: 10px;
       font-size: 1rem;
-      width: 260px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      outline: none;
     }
-
-    .action-button {
+    .story-card a, .story-card button {
+      display: block;
+      margin: 6px auto;
+      text-decoration: none;
+      color: white;
       background: linear-gradient(135deg, #7F00FF, #E100FF);
       border: none;
-      color: white;
-      padding: 14px 28px;
-      border-radius: 30px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 10px;
-    }
-
-    .action-button:hover {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, #8f00ff, #d900ff);
-    }
-
-    .story-box {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      max-width: 600px;
-      margin-top: 30px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    }
-
-    .music-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-      border: none;
-      color: #333;
-      padding: 10px 20px;
+      padding: 6px 12px;
       border-radius: 20px;
       font-size: 0.9rem;
       cursor: pointer;
     }
-    .story-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 一行固定4列 */
-  gap: 20px;
-  margin-top: 40px;
-  justify-items: center;
-}
-.story-card {
-  background: white;
-  padding: 12px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  text-align: center;
-}
-.story-card img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-.story-card h3 {
-  margin-top: 10px;
-  font-size: 1rem;
-}
-.story-card a {
-  text-decoration: none;
-  color: inherit;
-}
+    .story-card button.fav {
+      background: #eee;
+      color: #444;
+      border: 1px solid #ccc;
+    }
+    .story-card button.fav.active {
+      background: #ffe4ec;
+      color: #d10073;
+      border-color: #ffb6c1;
+    }
   </style>
 </head>
 <body>
-
-<img src="dreamtalk-logo.png" alt="DreamTalk Logo" class="logo" />
-<h1>DreamTalk Box</h1>
-
-<div class="input-group">
-  <input type="text" id="keywordInput" placeholder="Enter a story keyword..." />
-</div>
-
-<div>
-    <button class="action-button" onclick="window.location.href='story-player.html'">📖 Generate Full Story</button>
-    <button class="action-button" onclick="window.location.href='record.html'">🎤 Upload Voice</button>
-  </div>
-
-  <p style="font-size: 0.9rem; color: #555; margin-top: -10px;">
-    🔊 Default voice will be used unless you upload yours.
-  </p>
-
-<div class="story-box" id="storyDisplay" style="display: none;"></div>
-<h2 style="margin-top: 40px;">🌟 Built-in Bedtime Stories</h2>
-<div class="story-grid" id="storyGrid"></div>
-
-<button class="music-toggle" onclick="toggleMusic()">🔈 Music</button>
-
-<audio id="backgroundMusic" loop preload="auto">
-  <source src="story-bgm.mp3" type="audio/mpeg" />
-</audio>
-<audio id="clickSound" preload="auto">
-  <source src="stop-record.mp3" type="audio/mpeg" />
-</audio>
+  <h1>🌟 Built-in Bedtime Stories</h1>
+  <div class="story-grid" id="storyGrid"></div>
 
 <script>
-  const clickSound = document.getElementById('clickSound');
+  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-  function playClick() {
-    if (clickSound) {
-      clickSound.currentTime = 0;
-      clickSound.play();
-    }
+  function saveFavorites() {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
   }
 
-  function toggleMusic() {
-    playClick();
-    const music = document.getElementById('backgroundMusic');
-    const btn = document.querySelector('.music-toggle');
-    if (music.paused) {
-      music.play();
-      btn.textContent = '🔈 Music';
+  function toggleFavorite(id, btn) {
+    const index = favorites.indexOf(id);
+    if (index >= 0) {
+      favorites.splice(index, 1);
     } else {
-      music.pause();
-      btn.textContent = '🔇 Muted';
+      favorites.push(id);
     }
+    saveFavorites();
+    btn.innerText = favorites.includes(id) ? "✅ Favorited" : "⭐ Favorite";
+    btn.classList.toggle("active", favorites.includes(id));
   }
 
-  function generateStory() {
-    playClick();
-    const keyword = document.getElementById('keywordInput').value.trim();
-    const storyBox = document.getElementById('storyDisplay');
-
-    if (!keyword) {
-      storyBox.innerHTML = "Please enter a keyword!";
-      storyBox.style.display = 'block';
-      return;
-    }
-
-    const story = `Once upon a time, there was a magical place full of dreams and wonder where a little child named ${keyword} would drift into an enchanted forest each night. There, they met talking animals, floating stars, and a gentle moon that told bedtime stories...`;
-    storyBox.innerText = story;
-    storyBox.style.display = 'block';
-
-    localStorage.setItem("latestStory", story);
-  }
-
-  function speakStory() {
-    playClick();
-    const story = document.getElementById('storyDisplay').innerText;
-    if (!story) return;
-
-    const utterance = new SpeechSynthesisUtterance(story);
-    utterance.lang = 'en-US';
-    utterance.rate = 1;
-    utterance.pitch = 1.2;
-    speechSynthesis.cancel(); // stop previous
-    speechSynthesis.speak(utterance);
-  }
-
-  window.onload = () => {
-    const bgm = document.getElementById('backgroundMusic');
-    if (bgm) {
-      bgm.play().catch(() => {});
-    }
-
-    document.querySelectorAll("button").forEach(btn => {
-      btn.addEventListener("click", playClick);
-    });
-  };
   fetch("stories.json")
-  .then(res => res.json())
-  .then(stories => {
-    const container = document.getElementById("storyGrid");
-    stories.forEach(story => {
-      const card = document.createElement("div");
-      card.className = "story-card";
-      card.innerHTML = `
-        <a href="story-player.html?id=${story.id}">
+    .then(res => res.json())
+    .then(stories => {
+      const container = document.getElementById("storyGrid");
+      stories.forEach(story => {
+        const card = document.createElement("div");
+        card.className = "story-card";
+        const isFav = favorites.includes(story.id);
+        card.innerHTML = `
           <img src="${story.cover}" alt="${story.title}" />
           <h3>${story.title}</h3>
-        </a>
-      `;
-      container.appendChild(card);
+          <a href="story-player.html?id=${story.id}">▶️ Play</a>
+          <button class="fav ${isFav ? 'active' : ''}" onclick="toggleFavorite('${story.id}', this)">
+            ${isFav ? "✅ Favorited" : "⭐ Favorite"}
+          </button>
+        `;
+        container.appendChild(card);
+      });
     });
-  });
 </script>
-
-<!-- 🌟 用户反馈按钮 -->
-<div style="margin-top: 40px; text-align: center;">
-    <button onclick="openFeedbackForm()" style="background-color: #ff69b4; color: white; padding: 10px 20px; border: none; border-radius: 8px;">💬 Leave Feedback</button>
-  </div>
-  
-  <script>
-    function openFeedbackForm() {
-      const feedback = prompt("We'd love your feedback! Please share your thoughts:");
-      if (feedback) {
-        alert("Thanks for your feedback!\n\n(Your message was recorded in memory.)");
-        // 👉 TODO: Send to Google Sheet, Notion, Email, or database here
-      }
-    }
-  </script>
-
 </body>
 </html>
