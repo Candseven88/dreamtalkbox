@@ -3,61 +3,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DreamTalk Box - Story Player</title>
+  <title>Story Player</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #c9d6ff, #fbc2eb);
-      min-height: 100vh;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    h1 {
-      font-size: 2rem;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .story-box {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      max-width: 600px;
-      margin: 20px 0;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      white-space: pre-wrap;
-    }
-    .action-button {
-      background: linear-gradient(135deg, #7F00FF, #E100FF);
-      border: none;
-      color: white;
-      padding: 14px 28px;
-      border-radius: 30px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 10px;
-    }
-    audio {
-      margin-top: 20px;
-    }
+    body { font-family: sans-serif; background: #f0f0ff; padding: 40px; text-align: center; }
+    .story-box { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 16px; }
+    img { max-width: 100%; border-radius: 12px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
+  <div class="story-box">
+    <img id="storyCover" src="" alt="Story Cover"/>
+    <h2 id="storyTitle">Loading...</h2>
+    <p id="storyText"></p>
+  </div>
 
-<h1>🌙 Bedtime Story</h1>
-<div class="story-box">
-In a quiet forest, a little bear tucked under the stars, whispered goodnight to the moon. The wind hummed softly, and dreams gently floated in.
-</div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const storyId = urlParams.get("id");
 
-<audio controls>
-  <source src="story-voice.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
-
+    fetch("stories.json")
+      .then(res => res.json())
+      .then(stories => {
+        const story = stories.find(s => s.id === storyId);
+        if (story) {
+          document.getElementById("storyTitle").innerText = story.title;
+          document.getElementById("storyText").innerText = story.content;
+          document.getElementById("storyCover").src = story.cover;
+        } else {
+          document.getElementById("storyTitle").innerText = "Story Not Found";
+        }
+      });
+  </script>
 </body>
 </html>
