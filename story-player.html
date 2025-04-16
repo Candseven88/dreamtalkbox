@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,24 +17,11 @@
       align-items: center;
       text-align: center;
     }
-
-    img.logo {
-      width: 120px;
-      margin-bottom: 20px;
-      animation: bounceLogo 2s infinite;
-    }
-
-    @keyframes bounceLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
     h1 {
       font-size: 2rem;
       color: #333;
       margin-bottom: 10px;
     }
-
     .story-box {
       background: white;
       padding: 20px;
@@ -43,7 +31,6 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
       white-space: pre-wrap;
     }
-
     .action-button {
       background: linear-gradient(135deg, #7F00FF, #E100FF);
       border: none;
@@ -55,112 +42,22 @@
       transition: all 0.3s ease;
       margin: 10px;
     }
-
-    .action-button:hover {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, #8f00ff, #d900ff);
-    }
-
-    .music-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-      border: none;
-      color: #333;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      cursor: pointer;
+    audio {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-<img src="dreamtalk-logo.png" alt="Logo" class="logo" />
-<h1>Your Bedtime Story</h1>
-
-<div class="story-box" id="storyText">Loading story...</div>
-
-<div>
-  <button class="action-button" onclick="speakStory()">🔊 Play Story</button>
-  <button class="action-button" onclick="goHome()">🏠 Back to Home</button>
+<h1>🌙 Bedtime Story</h1>
+<div class="story-box">
+In a quiet forest, a little bear tucked under the stars, whispered goodnight to the moon. The wind hummed softly, and dreams gently floated in.
 </div>
 
-<button class="music-toggle" onclick="toggleMusic()">🔈 Music</button>
-
-<audio id="backgroundMusic" loop preload="auto">
-  <source src="story-bgm.mp3" type="audio/mpeg" />
+<audio controls>
+  <source src="story-voice.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
 </audio>
-<audio id="clickSound" preload="auto">
-  <source src="stop-record.mp3" type="audio/mpeg" />
-</audio>
-
-<script>
-  const storyBox = document.getElementById("storyText");
-  const clickSound = document.getElementById("clickSound");
-
-  function playClick() {
-    clickSound.currentTime = 0;
-    clickSound.play();
-  }
-
-  function loadStory() {
-    let story = "";
-    const storyIndex = localStorage.getItem("latestStoryIndex");
-    const stories = JSON.parse(localStorage.getItem("customStories") || "[]");
-
-    if (storyIndex !== null && stories[storyIndex]) {
-      story = stories[storyIndex].content;
-    } else {
-      story = localStorage.getItem("latestStory") || "No story found.";
-    }
-
-    storyBox.textContent = story;
-  }
-
-  function speakStory() {
-    playClick();
-    const text = storyBox.textContent;
-    if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 1;
-    utterance.pitch = 1.2;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
-  }
-
-  function goHome() {
-    playClick();
-    localStorage.removeItem("latestStoryIndex");
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 300);
-  }
-
-  function toggleMusic() {
-    playClick();
-    const music = document.getElementById('backgroundMusic');
-    const btn = document.querySelector('.music-toggle');
-    if (music.paused) {
-      music.play();
-      btn.textContent = '🔈 Music';
-    } else {
-      music.pause();
-      btn.textContent = '🔇 Muted';
-    }
-  }
-
-  window.onload = () => {
-    loadStory();
-    const bgm = document.getElementById('backgroundMusic');
-    bgm && bgm.play().catch(() => {});
-    document.querySelectorAll("button").forEach(btn => {
-      btn.addEventListener("click", playClick);
-    });
-  };
-</script>
 
 </body>
 </html>
