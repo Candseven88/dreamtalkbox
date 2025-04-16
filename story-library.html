@@ -75,9 +75,10 @@
           const card = document.createElement("div");
           card.className = "story-card";
           card.innerHTML = `
-            <h3>${story.title}</h3>
-            <button onclick="window.location.href='story-player.html?id=${story.id}'">▶️ Play</button>
-          `;
+  <h3>${story.title}</h3>
+  <button onclick="window.location.href='story-player.html?id=${story.id}'">▶️ Play</button>
+  <button onclick="window.location.href='story-upload.html?id=${story.id}'">✏️ Edit</button>
+`;
           favContainer.appendChild(card);
         });
       }
