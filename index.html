@@ -92,7 +92,8 @@
 
   <input type="text" placeholder="Enter a story keyword..." id="keyword"/>
   <button onclick="generateStory()">📖 Generate Full Story</button>
-  <button onclick="window.location.href='record.html'">🎤 Upload Voice</button>
+<button onclick="document.getElementById('voiceUpload').click()">🎤 Upload Voice</button>
+<button onclick="cloneMyVoice()">🧬 Clone My Voice</button>
 
   <div class="story-section">
     <h2>✨ Built-in Bedtime Stories</h2>
@@ -150,5 +151,39 @@
 
     window.onload = loadStories;
   </script>
+
+<input type="file" id="voiceUpload" style="display:none" accept="audio/*" onchange="handleVoiceUpload(event)">
+<script>
+  let voiceId = "39TvLx60dsfus7kWDYn1";
+
+  async function handleVoiceUpload(event) {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch("https://api.elevenlabs.io/v1/voice/clone", {
+      method: "POST",
+      headers: {
+        "xi-api-key": "sk_4e74cff477885d28e83164f5e6aedb5e27801ae5c2660b8a"
+      },
+      body: formData
+    });
+    const data = await response.json();
+    voiceId = data.voice_id;
+    alert("Voice uploaded and cloned successfully!");
+  }
+
+  async function cloneMyVoice() {
+    document.getElementById('voiceUpload').click();
+  }
+
+  async function generateStory() {
+    const keyword = document.querySelector("input").value || "bedtime dream";
+    const story = `Once upon a time, ${keyword}...`; // 你可以接入完整生成逻辑
+    localStorage.setItem("currentStory", story);
+    localStorage.setItem("voiceId", voiceId);
+    window.location.href = "story-player.html";
+  }
+</script>
+
 </body>
 </html>
